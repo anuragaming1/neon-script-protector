@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Head from 'next/head';
 
 // Biến toàn cục để lưu scripts
@@ -8,7 +8,6 @@ if (typeof global.scripts === 'undefined') {
 
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [activeTab, setActiveTab] = useState('create');
   const [formData, setFormData] = useState({
     repoName: '',
     realScript: '',
@@ -17,26 +16,11 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(false);
-  const [scriptHistory, setScriptHistory] = useState([]);
-  const [editingScript, setEditingScript] = useState(null);
+  const [realFile, setRealFile] = useState(null);
+  const [fakeFile, setFakeFile] = useState(null);
 
   const VALID_USERNAME = "Anura123";
   const VALID_PASSWORD = "Anura123";
-
-  // Load lịch sử khi đăng nhập
-  useEffect(() => {
-    if (isLoggedIn) {
-      loadScriptHistory();
-    }
-  }, [isLoggedIn]);
-
-  const loadScriptHistory = () => {
-    const history = Array.from(global.scripts.values()).map(script => ({
-      ...script,
-      isDeleted: script.isDeleted || false
-    }));
-    setScriptHistory(history.reverse());
-  };
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -52,15 +36,32 @@ export default function Home() {
     }
   };
 
-  // Xử lý upload file
-  const handleFileUpload = (e, field) => {
+  // Xử lý upload file thật
+  const handleRealFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setRealFile(file);
       const reader = new FileReader();
       reader.onload = (e) => {
         setFormData(prev => ({
           ...prev,
-          [field]: e.target.result
+          realScript: e.target.result
+        }));
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  // Xử lý upload file giả
+  const handleFakeFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFakeFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          fakeScript: e.target.result
         }));
       };
       reader.readAsText(file);
@@ -84,8 +85,6 @@ export default function Home() {
       
       if (data.success) {
         setResult(data);
-        setFormData({ repoName: '', realScript: '', fakeScript: '' });
-        loadScriptHistory(); // Reload lịch sử
       } else {
         alert('Có lỗi xảy ra khi tạo script: ' + (data.error || 'Unknown error'));
       }
@@ -104,62 +103,10 @@ export default function Home() {
     });
   };
 
-  // Xóa script
-  const deleteScript = (id) => {
-    if (confirm('Bạn có chắc muốn xóa script này?')) {
-      const script = global.scripts.get(id);
-      if (script) {
-        script.isDeleted = true;
-        script.deletedAt = new Date().toISOString();
-        global.scripts.set(id, script);
-        loadScriptHistory();
-      }
-    }
-  };
-
-  // Chỉnh sửa script
-  const editScript = (script) => {
-    setEditingScript(script);
-    setFormData({
-      repoName: script.repoName,
-      realScript: script.realScript,
-      fakeScript: script.fakeScript
-    });
-    setActiveTab('create');
-  };
-
-  // Cập nhật script
-  const updateScript = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-
-    try {
-      const script = global.scripts.get(editingScript.id);
-      if (script) {
-        script.repoName = formData.repoName;
-        script.realScript = formData.realScript;
-        script.fakeScript = formData.fakeScript;
-        script.updatedAt = new Date().toISOString();
-        
-        global.scripts.set(editingScript.id, script);
-        
-        setEditingScript(null);
-        setFormData({ repoName: '', realScript: '', fakeScript: '' });
-        loadScriptHistory();
-        alert('Cập nhật script thành công!');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Lỗi cập nhật script!');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert('Đã copy URL vào clipboard!');
+      alert('Đã copy vào clipboard!');
     } catch (err) {
       console.error('Failed to copy: ', err);
     }
@@ -231,11 +178,12 @@ export default function Home() {
     },
     fileInput: {
       width: '100%',
-      padding: '8px',
+      padding: '12px 16px',
       background: 'rgba(10, 10, 22, 0.7)',
       border: '1px solid rgba(255, 7, 58, 0.3)',
       borderRadius: '8px',
       color: '#e6eef8',
+      fontFamily: "'Poppins', sans-serif",
       fontSize: '14px'
     },
     btn: {
@@ -261,10 +209,6 @@ export default function Home() {
       color: '#94a3b8',
       border: '1px solid rgba(255,255,255,0.2)'
     },
-    btnDanger: {
-      background: 'linear-gradient(90deg, #dc2626, #b91c1c)',
-      color: 'white'
-    },
     btnSuccess: {
       background: 'linear-gradient(90deg, #10b981, #059669)',
       color: '#fff'
@@ -282,58 +226,22 @@ export default function Home() {
       fontWeight: '700',
       textShadow: '0 0 10px rgba(255, 7, 58, 0.7)'
     },
-    tabContainer: {
-      display: 'flex',
-      marginBottom: '20px',
-      borderBottom: '1px solid rgba(255,255,255,0.1)'
-    },
-    tab: {
-      padding: '10px 20px',
-      cursor: 'pointer',
-      fontWeight: '600',
-      borderBottom: '2px solid transparent'
-    },
-    tabActive: {
+    fileInfo: {
+      fontSize: '12px',
       color: '#00f3ff',
-      borderBottom: '2px solid #00f3ff'
+      marginTop: '5px',
+      fontStyle: 'italic'
     },
-    scriptItem: {
-      background: 'rgba(10, 10, 22, 0.7)',
-      padding: '15px',
+    codeBlock: {
+      background: 'rgba(0, 0, 0, 0.3)',
+      padding: '12px',
       borderRadius: '8px',
-      marginBottom: '10px',
-      border: '1px solid rgba(255,255,255,0.1)'
-    },
-    scriptHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '10px'
-    },
-    scriptUrl: {
-      color: '#00f3ff',
+      border: '1px solid rgba(0, 243, 255, 0.3)',
+      marginTop: '10px',
       fontFamily: 'monospace',
-      fontSize: '12px',
+      fontSize: '14px',
+      color: '#00f3ff',
       wordBreak: 'break-all'
-    },
-    scriptActions: {
-      display: 'flex',
-      gap: '10px'
-    },
-    smallBtn: {
-      padding: '6px 12px',
-      fontSize: '12px',
-      borderRadius: '6px',
-      border: 'none',
-      cursor: 'pointer'
-    },
-    deletedBadge: {
-      background: '#dc2626',
-      color: 'white',
-      padding: '4px 8px',
-      borderRadius: '4px',
-      fontSize: '12px',
-      fontWeight: '600'
     }
   };
 
@@ -363,7 +271,7 @@ export default function Home() {
         </Head>
         <div style={styles.container}>
           <div style={styles.card}>
-            <div style={styles.logo}>Anura Gaming Script</div>
+            <div style={styles.logo}>Anura Meow</div>
             <h1 style={styles.title}>Đăng Nhập</h1>
             <form onSubmit={handleLogin}>
               <div style={styles.formGroup}>
@@ -427,206 +335,155 @@ export default function Home() {
       
       <div style={styles.container}>
         <div style={styles.card}>
-          <div style={styles.logo}>NEON SCRIPT PROTECTOR</div>
-          <h1 style={styles.title}>
-            {editingScript ? 'Chỉnh Sửa Script' : 'Tạo Script Bảo Mật'}
-          </h1>
+          <div style={styles.logo}>Anura Meow script </div>
+          <h1 style={styles.title}>Tạo Script Bảo Mật</h1>
           
-          <div style={styles.tabContainer}>
-            <div 
-              style={{...styles.tab, ...(activeTab === 'create' ? styles.tabActive : {})}}
-              onClick={() => {
-                setActiveTab('create');
-                setEditingScript(null);
-                setFormData({ repoName: '', realScript: '', fakeScript: '' });
-              }}
-            >
-              {editingScript ? 'Chỉnh Sửa' : 'Tạo Script'}
+          <form onSubmit={handleGenerate}>
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="repoName">Tên Repository</label>
+              <input 
+                style={styles.input}
+                type="text" 
+                id="repoName" 
+                name="repoName"
+                value={formData.repoName}
+                onChange={handleInputChange}
+                placeholder="Nhập tên repo của bạn" 
+                required
+              />
             </div>
-            <div 
-              style={{...styles.tab, ...(activeTab === 'history' ? styles.tabActive : {})}}
-              onClick={() => setActiveTab('history')}
-            >
-              Lịch Sử ({scriptHistory.length})
-            </div>
-          </div>
-          
-          {activeTab === 'create' && (
-            <form onSubmit={editingScript ? updateScript : handleGenerate}>
-              <div style={styles.formGroup}>
-                <label style={styles.label} htmlFor="repoName">Tên Repository</label>
-                <input 
-                  style={styles.input}
-                  type="text" 
-                  id="repoName" 
-                  name="repoName"
-                  value={formData.repoName}
-                  onChange={handleInputChange}
-                  placeholder="Nhập tên repo của bạn" 
-                  required
-                />
-              </div>
-              
-              <div style={styles.formGroup}>
-                <label style={styles.label} htmlFor="realScript">
-                  Script Thật (Chỉ Executor thấy)
-                </label>
-                <input 
-                  type="file" 
-                  accept=".lua,.txt,.js"
-                  onChange={(e) => handleFileUpload(e, 'realScript')}
-                  style={styles.fileInput}
-                />
-                <textarea 
-                  style={styles.textarea}
-                  id="realScript" 
-                  name="realScript"
-                  value={formData.realScript}
-                  onChange={handleInputChange}
-                  placeholder="Hoặc paste mã nguồn thật của bạn..." 
-                  required
-                />
-              </div>
-              
-              <div style={styles.formGroup}>
-                <label style={styles.label} htmlFor="fakeScript">
-                  Script Giả (Người dùng thường thấy)
-                </label>
-                <input 
-                  type="file" 
-                  accept=".lua,.txt,.js"
-                  onChange={(e) => handleFileUpload(e, 'fakeScript')}
-                  style={styles.fileInput}
-                />
-                <textarea 
-                  style={styles.textarea}
-                  id="fakeScript" 
-                  name="fakeScript"
-                  value={formData.fakeScript}
-                  onChange={handleInputChange}
-                  placeholder="Hoặc paste mã nguồn giả..." 
-                  required
-                />
-              </div>
-              
-              <button 
-                type="submit" 
-                style={{...styles.btn, ...styles.btnPrimary, opacity: loading ? 0.6 : 1}}
-                disabled={loading}
-              >
-                {loading ? 'Đang xử lý...' : (editingScript ? 'Cập Nhật Script' : 'Tạo Script URL')}
-              </button>
-              
-              {editingScript && (
-                <button 
-                  type="button" 
-                  style={{...styles.btn, ...styles.btnSecondary}}
-                  onClick={() => {
-                    setEditingScript(null);
-                    setFormData({ repoName: '', realScript: '', fakeScript: '' });
-                  }}
-                >
-                  Hủy Chỉnh Sửa
-                </button>
-              )}
-              
-              <button 
-                type="button" 
-                style={{...styles.btn, ...styles.btnSecondary}}
-                onClick={() => setIsLoggedIn(false)}
-              >
-                Đăng Xuất
-              </button>
-              
-              {result && !editingScript && (
-                <div style={{
-                  marginTop: '20px',
-                  padding: '16px',
-                  background: 'rgba(10, 10, 22, 0.7)',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(0, 243, 255, 0.3)'
-                }}>
-                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px'}}>URL Script của bạn:</div>
-                  <div style={{
-                    wordBreak: 'break-all',
-                    fontFamily: 'monospace',
-                    fontSize: '14px',
-                    color: '#00f3ff',
-                    marginBottom: '12px',
-                    padding: '8px',
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    borderRadius: '4px'
-                  }}>{result.url}</div>
-                  
-                  <div style={{marginBottom: '12px', padding: '8px', background: 'rgba(0,0,0,0.2)', borderRadius: '4px'}}>
-                    <div style={{color: '#94a3b8', fontSize: '12px', marginBottom: '5px'}}>Code để copy:</div>
-                    <code style={{color: '#00f3ff', fontFamily: 'monospace', fontSize: '12px'}}>
-                      loadstring(game:HttpGet("{result.url}"))()
-                    </code>
-                  </div>
-                  
-                  <button 
-                    type="button" 
-                    style={{...styles.btn, ...styles.btnSuccess}}
-                    onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}"))()`)}
-                  >
-                    Copy Code Executor
-                  </button>
+            
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="realScript">
+                Script Thật (Chỉ Executor thấy) - .lua, .luau, .txt
+              </label>
+              <input
+                style={styles.fileInput}
+                type="file"
+                id="realFile"
+                accept=".lua,.luau,.txt,.xml,.json,.py,.js,.css,.html"
+                onChange={handleRealFileUpload}
+              />
+              {realFile && (
+                <div style={styles.fileInfo}>
+                  Đã chọn: {realFile.name} ({realFile.size} bytes)
                 </div>
               )}
-            </form>
-          )}
-          
-          {activeTab === 'history' && (
-            <div>
-              <h3 style={{color: '#e6eef8', marginBottom: '15px'}}>Lịch Sử Script</h3>
-              
-              {scriptHistory.length === 0 ? (
-                <p style={{color: '#94a3b8', textAlign: 'center'}}>Chưa có script nào được tạo</p>
-              ) : (
-                scriptHistory.map(script => (
-                  <div key={script.id} style={styles.scriptItem}>
-                    <div style={styles.scriptHeader}>
-                      <div>
-                        <strong style={{color: '#e6eef8'}}>{script.repoName}</strong>
-                        {script.isDeleted && (
-                          <span style={{...styles.deletedBadge, marginLeft: '10px'}}>ĐÃ XÓA</span>
-                        )}
-                      </div>
-                      <div style={styles.scriptActions}>
-                        {!script.isDeleted && (
-                          <>
-                            <button 
-                              style={{...styles.smallBtn, background: '#3b82f6', color: 'white'}}
-                              onClick={() => editScript(script)}
-                            >
-                              Sửa
-                            </button>
-                            <button 
-                              style={{...styles.smallBtn, background: '#dc2626', color: 'white'}}
-                              onClick={() => deleteScript(script.id)}
-                            >
-                              Xóa
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                    
-                    <div style={styles.scriptUrl}>
-                      {typeof window !== 'undefined' && `${window.location.origin}/api/raw/${script.id}`}
-                    </div>
-                    
-                    <div style={{marginTop: '8px', fontSize: '12px', color: '#94a3b8'}}>
-                      Tạo: {new Date(script.createdAt).toLocaleString('vi-VN')}
-                      {script.updatedAt && ` | Sửa: ${new Date(script.updatedAt).toLocaleString('vi-VN')}`}
-                      {script.isDeleted && ` | Xóa: ${new Date(script.deletedAt).toLocaleString('vi-VN')}`}
-                    </div>
-                  </div>
-                ))
-              )}
+              <textarea 
+                style={{...styles.textarea, marginTop: '10px'}}
+                id="realScript" 
+                name="realScript"
+                value={formData.realScript}
+                onChange={handleInputChange}
+                placeholder="Hoặc paste mã nguồn thật của bạn tại đây..." 
+              />
             </div>
-          )}
+            
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="fakeScript">
+                Script Giả (Người dùng thường thấy) - .lua, .luau, .txt
+              </label>
+              <input
+                style={styles.fileInput}
+                type="file"
+                id="fakeFile"
+                accept=".lua,.luau,.txt,.xml,.json,.py,.js,.css,.html"
+                onChange={handleFakeFileUpload}
+              />
+              {fakeFile && (
+                <div style={styles.fileInfo}>
+                  Đã chọn: {fakeFile.name} ({fakeFile.size} bytes)
+                </div>
+              )}
+              <textarea 
+                style={{...styles.textarea, marginTop: '10px'}}
+                id="fakeScript" 
+                name="fakeScript"
+                value={formData.fakeScript}
+                onChange={handleInputChange}
+                placeholder="Hoặc paste mã nguồn giả tại đây..." 
+              />
+            </div>
+            
+            <button 
+              type="submit" 
+              style={{...styles.btn, ...styles.btnPrimary, opacity: loading ? 0.6 : 1}}
+              disabled={loading}
+            >
+              {loading ? 'Đang tạo...' : 'Tạo Script URL'}
+            </button>
+            <button 
+              type="button" 
+              style={{...styles.btn, ...styles.btnSecondary}}
+              onClick={() => setIsLoggedIn(false)}
+            >
+              Đăng Xuất
+            </button>
+            
+            {result && (
+              <div style={{
+                marginTop: '20px',
+                padding: '16px',
+                background: 'rgba(10, 10, 22, 0.7)',
+                borderRadius: '8px',
+                border: '1px solid rgba(0, 243, 255, 0.3)'
+              }}>
+                <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
+                  🎉 URL Script của bạn:
+                </div>
+                <div style={styles.codeBlock}>
+                  {result.url}
+                </div>
+                
+                <div style={{marginTop: '15px'}}>
+                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
+                    📋 Code để copy (Executor):
+                  </div>
+                  <div style={styles.codeBlock}>
+                    loadstring(game:HttpGet("{result.url}"))()
+                  </div>
+                  <button 
+                    type="button" 
+                    style={{...styles.btn, ...styles.btnSuccess, marginTop: '10px'}}
+                    onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}"))()`)}
+                  >
+                    Copy Executor Code
+                  </button>
+                </div>
+                
+                <div style={{marginTop: '15px'}}>
+                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
+                    🌐 Test với curl:
+                  </div>
+                  <div style={styles.codeBlock}>
+                    curl "{result.url}"
+                  </div>
+                  <button 
+                    type="button" 
+                    style={{...styles.btn, ...styles.btnSecondary, marginTop: '10px'}}
+                    onClick={() => copyToClipboard(result.url)}
+                  >
+                    Copy Raw URL
+                  </button>
+                </div>
+                
+                <div style={{
+                  marginTop: '15px',
+                  padding: '12px',
+                  background: 'rgba(255, 7, 58, 0.1)',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(255, 7, 58, 0.3)',
+                  fontSize: '12px',
+                  color: '#94a3b8'
+                }}>
+                  <strong>💡 Lưu ý:</strong><br/>
+                  - Executor sẽ thấy script thật<br/>
+                  - Browser/Termux sẽ thấy script giả<br/>
+                  - Hỗ trợ file: .lua, .luau, .txt, .xml, .json, .py, .js, .css, .html
+                </div>
+              </div>
+            )}
+          </form>
         </div>
       </div>
     </>
