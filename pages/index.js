@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
-import '../styles/globals.css';
-
+export default function Home() {
 // Biến toàn cục để lưu scripts (trong production dùng database)
 if (typeof global.scripts === 'undefined') {
   global.scripts = new Map();
