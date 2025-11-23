@@ -1,5 +1,7 @@
 // pages/api/raw/[id].js
-const { getScript } = require('../../../../lib/database');
+
+// Import scripts từ global
+const scripts = global.scripts || new Map();
 
 export default async function handler(req, res) {
   const { id } = req.query;
@@ -20,8 +22,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Lấy script từ database
-    const script = getScript(id);
+    // Lấy script từ global
+    const script = scripts.get(id);
     
     if (!script) {
       return res.status(404).json({ 
@@ -31,7 +33,6 @@ export default async function handler(req, res) {
     }
 
     // LUÔN trả về script thật cho tất cả request
-    // Để đảm bảo executor nào cũng chạy được
     const scriptContent = script.realScript;
 
     // Set headers cho Luau code
@@ -39,6 +40,7 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache 1 năm
     
     console.log(`Serving script: ${id}`);
+    console.log('Available scripts:', Array.from(scripts.keys()));
     
     return res.send(scriptContent);
     
