@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Bỏ experimental config
+  // Config trống
 }
 
 module.exports = nextConfig
