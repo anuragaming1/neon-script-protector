@@ -363,7 +363,7 @@ export default function Home() {
         </Head>
         <div style={styles.container}>
           <div style={styles.card}>
-            <div style={styles.logo}>NEON SCRIPT PROTECTOR</div>
+            <div style={styles.logo}>Anura Gaming Script</div>
             <h1 style={styles.title}>Đăng Nhập</h1>
             <form onSubmit={handleLogin}>
               <div style={styles.formGroup}>
