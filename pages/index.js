@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import Head from 'next/head';
 
-export default function Home() {
-// Biến toàn cục để lưu scripts (trong production dùng database)
+// Biến toàn cục để lưu scripts
 if (typeof global.scripts === 'undefined') {
   global.scripts = new Map();
 }
@@ -80,45 +79,163 @@ export default function Home() {
     }
   };
 
+  // CSS variables
+  const styles = {
+    container: {
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #050510, #0b1020)',
+      fontFamily: "'Poppins', sans-serif",
+      padding: '20px',
+      margin: 0
+    },
+    card: {
+      width: '100%',
+      maxWidth: '500px',
+      background: '#0d0d1a',
+      borderRadius: '16px',
+      padding: '30px',
+      boxShadow: '0 0 20px rgba(255, 7, 58, 0.2)',
+      border: '1px solid rgba(255, 7, 58, 0.3)',
+      position: 'relative',
+      overflow: 'hidden'
+    },
+    cardBefore: {
+      content: '""',
+      position: 'absolute',
+      top: '-2px',
+      left: '-2px',
+      right: '-2px',
+      bottom: '-2px',
+      background: 'linear-gradient(45deg, #ff073a, #00f3ff, #ff073a)',
+      borderRadius: '18px',
+      zIndex: -1,
+      animation: 'neon-border 3s linear infinite'
+    },
+    title: {
+      textAlign: 'center',
+      marginBottom: '24px',
+      fontWeight: '700',
+      fontSize: '28px',
+      background: 'linear-gradient(90deg, #ff073a, #00f3ff)',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      textShadow: '0 0 10px rgba(255, 7, 58, 0.5)'
+    },
+    formGroup: {
+      marginBottom: '20px'
+    },
+    label: {
+      display: 'block',
+      marginBottom: '8px',
+      fontWeight: '600',
+      color: '#94a3b8'
+    },
+    input: {
+      width: '100%',
+      padding: '12px 16px',
+      background: 'rgba(10, 10, 22, 0.7)',
+      border: '1px solid rgba(255, 7, 58, 0.3)',
+      borderRadius: '8px',
+      color: '#e6eef8',
+      fontFamily: "'Poppins', sans-serif",
+      fontSize: '14px'
+    },
+    textarea: {
+      width: '100%',
+      padding: '12px 16px',
+      background: 'rgba(10, 10, 22, 0.7)',
+      border: '1px solid rgba(255, 7, 58, 0.3)',
+      borderRadius: '8px',
+      color: '#e6eef8',
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      minHeight: '120px',
+      resize: 'vertical'
+    },
+    btn: {
+      display: 'block',
+      width: '100%',
+      padding: '14px',
+      border: 'none',
+      borderRadius: '8px',
+      fontFamily: "'Poppins', sans-serif",
+      fontSize: '16px',
+      fontWeight: '600',
+      cursor: 'pointer',
+      textAlign: 'center',
+      marginTop: '10px'
+    },
+    btnPrimary: {
+      background: 'linear-gradient(90deg, #ff073a, #00f3ff)',
+      color: 'white',
+      boxShadow: '0 0 15px rgba(255, 7, 58, 0.4)'
+    },
+    error: {
+      color: '#ff073a',
+      fontSize: '14px',
+      marginTop: '8px',
+      textAlign: 'center'
+    },
+    logo: {
+      textAlign: 'center',
+      marginBottom: '20px',
+      fontSize: '24px',
+      fontWeight: '700',
+      textShadow: '0 0 10px rgba(255, 7, 58, 0.7)'
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <>
         <Head>
           <title>Neon Script Protector - Đăng Nhập</title>
           <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <style jsx global>{`
+            @keyframes neon-border {
+              0% { filter: hue-rotate(0deg); }
+              100% { filter: hue-rotate(360deg); }
+            }
+          `}</style>
         </Head>
-        <div className="container">
-          <div className="logo">NEON SCRIPT PROTECTOR</div>
-          <h1>Đăng Nhập</h1>
-          <form onSubmit={handleLogin}>
-            <div className="form-group">
-              <label htmlFor="username">Tên đăng nhập</label>
-              <input 
-                type="text" 
-                id="username" 
-                name="username" 
-                placeholder="Nhập tên đăng nhập"
-                required 
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="password">Mật khẩu</label>
-              <input 
-                type="password" 
-                id="password" 
-                name="password" 
-                placeholder="Nhập mật khẩu"
-                required 
-              />
-            </div>
-            <button type="submit" className="btn btn-primary">Đăng Nhập</button>
-            {loginError && (
-              <div className="error-message">
-                Tên đăng nhập hoặc mật khẩu không đúng!
+        <div style={styles.container}>
+          <div style={styles.card}>
+            <div style={styles.logo}>NEON SCRIPT PROTECTOR</div>
+            <h1 style={styles.title}>Đăng Nhập</h1>
+            <form onSubmit={handleLogin}>
+              <div style={styles.formGroup}>
+                <label style={styles.label} htmlFor="username">Tên đăng nhập</label>
+                <input 
+                  style={styles.input}
+                  type="text" 
+                  id="username" 
+                  name="username" 
+                  placeholder="Nhập tên đăng nhập"
+                  required 
+                />
               </div>
-            )}
-          </form>
+              <div style={styles.formGroup}>
+                <label style={styles.label} htmlFor="password">Mật khẩu</label>
+                <input 
+                  style={styles.input}
+                  type="password" 
+                  id="password" 
+                  name="password" 
+                  placeholder="Nhập mật khẩu"
+                  required 
+                />
+              </div>
+              <button type="submit" style={{...styles.btn, ...styles.btnPrimary}}>Đăng Nhập</button>
+              {loginError && (
+                <div style={styles.error}>
+                  Tên đăng nhập hoặc mật khẩu không đúng!
+                </div>
+              )}
+            </form>
+          </div>
         </div>
       </>
     );
@@ -129,33 +246,24 @@ export default function Home() {
       <Head>
         <title>Neon Script Protector</title>
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <style jsx global>{`
+          @keyframes neon-border {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+          }
+        `}</style>
       </Head>
       
-      <div className="container">
-        <div className="logo">NEON SCRIPT PROTECTOR</div>
-        <h1>Tạo Script Bảo Mật</h1>
-        
-        <div className="tab-container">
-          <div 
-            className={`tab ${activeTab === 'create' ? 'active' : ''}`}
-            onClick={() => setActiveTab('create')}
-          >
-            Tạo Script
-          </div>
-          <div 
-            className={`tab ${activeTab === 'manage' ? 'active' : ''}`}
-            onClick={() => setActiveTab('manage')}
-          >
-            Quản Lý
-          </div>
-        </div>
-        
-        {activeTab === 'create' && (
+      <div style={styles.container}>
+        <div style={styles.card}>
+          <div style={styles.logo}>NEON SCRIPT PROTECTOR</div>
+          <h1 style={styles.title}>Tạo Script Bảo Mật</h1>
+          
           <form onSubmit={handleGenerate}>
-            <div className="form-group">
-              <label htmlFor="repoName">Tên Repository</label>
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="repoName">Tên Repository</label>
               <input 
+                style={styles.input}
                 type="text" 
                 id="repoName" 
                 name="repoName"
@@ -166,9 +274,10 @@ export default function Home() {
               />
             </div>
             
-            <div className="form-group">
-              <label htmlFor="realScript">Script Thật (Chỉ Executor thấy)</label>
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="realScript">Script Thật (Chỉ Executor thấy)</label>
               <textarea 
+                style={styles.textarea}
                 id="realScript" 
                 name="realScript"
                 value={formData.realScript}
@@ -178,9 +287,10 @@ export default function Home() {
               />
             </div>
             
-            <div className="form-group">
-              <label htmlFor="fakeScript">Script Giả (Người dùng thường thấy)</label>
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="fakeScript">Script Giả (Người dùng thường thấy)</label>
               <textarea 
+                style={styles.textarea}
                 id="fakeScript" 
                 name="fakeScript"
                 value={formData.fakeScript}
@@ -192,57 +302,49 @@ export default function Home() {
             
             <button 
               type="submit" 
-              className={`btn btn-primary ${loading ? 'loading' : ''}`} 
+              style={{...styles.btn, ...styles.btnPrimary, opacity: loading ? 0.6 : 1}}
               disabled={loading}
             >
               {loading ? 'Đang tạo...' : 'Tạo Script URL'}
             </button>
             <button 
               type="button" 
-              className="btn btn-secondary" 
+              style={{...styles.btn, background: 'transparent', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.2)'}}
               onClick={() => setIsLoggedIn(false)}
             >
               Đăng Xuất
             </button>
             
             {result && (
-              <div className="result show">
+              <div style={{
+                marginTop: '20px',
+                padding: '16px',
+                background: 'rgba(10, 10, 22, 0.7)',
+                borderRadius: '8px',
+                border: '1px solid rgba(0, 243, 255, 0.3)'
+              }}>
                 <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px'}}>URL Script của bạn:</div>
-                <div className="url-display">{result.url}</div>
+                <div style={{
+                  wordBreak: 'break-all',
+                  fontFamily: 'monospace',
+                  fontSize: '14px',
+                  color: '#00f3ff',
+                  marginBottom: '12px',
+                  padding: '8px',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: '4px'
+                }}>{result.url}</div>
                 <button 
                   type="button" 
-                  className="btn btn-success" 
+                  style={{...styles.btn, background: 'linear-gradient(90deg, #10b981, #059669)', color: '#fff'}}
                   onClick={() => copyToClipboard(result.url)}
                 >
                   Copy URL
                 </button>
-                
-                <div className="usage-example">
-                  <strong>Cách sử dụng:</strong><br/>
-                  - Trong Executor: <code>local data = game:HttpGet(&quot;{result.url}&quot;)</code><br/>
-                  - Trong Browser/Termux: <code>curl &quot;{result.url}&quot;</code><br/>
-                  <em>Executor sẽ thấy script thật, browser/curl sẽ thấy script giả</em>
-                </div>
               </div>
             )}
           </form>
-        )}
-        
-        {activeTab === 'manage' && (
-          <div>
-            <div id="scriptList">
-              <p style={{textAlign: 'center', color: 'var(--text-secondary)', margin: '20px 0'}}>
-                Chức năng quản lý script sẽ được phát triển trong phiên bản tiếp theo
-              </p>
-            </div>
-            <button 
-              className="btn btn-secondary" 
-              onClick={() => setActiveTab('create')}
-            >
-              Quay lại tạo script
-            </button>
-          </div>
-        )}
+        </div>
       </div>
     </>
   );
