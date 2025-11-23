@@ -20,23 +20,21 @@ export default function handler(req, res) {
   try {
     const userAgent = req.headers['user-agent'] || '';
     
-    // Detect executor - hỗ trợ cả Roblox Luau
-    const isExecutor = 
-      userAgent.includes('Roblox') || 
-      userAgent.includes('Executor') ||
-      userAgent.includes('Luau') ||
-      req.headers['x-roblox-id'] ||
-      req.headers['x-requested-with'] === 'XMLHttpRequest' ||
-      req.query.executor === 'true' ||
-      req.query.source === 'executor';
-
+    // CÁCH MỚI: Luôn trả về script thật cho tất cả request
+    // Vì các executor thường không gửi header đặc biệt
+    const isExecutor = true; // Luôn trả về script thật
+    
+    // HOẶC: Detect đơn giản hơn - nếu có query parameter 'executor'
+    // const isExecutor = req.query.executor === 'true' || true;
+    
     const scriptContent = isExecutor ? script.realScript : script.fakeScript;
     
-    // Set content type cho Luau/Lua
+    // QUAN TRỌNG: Set content type cho Luau code
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.setHeader('X-Script-ID', id);
-    res.setHeader('X-Script-Type', isExecutor ? 'real' : 'fake');
+    
+    console.log(`Serving script ${id} for executor: ${isExecutor}`);
     
     return res.send(scriptContent);
     
