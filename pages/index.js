@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
 
-// Biến toàn cục để lưu scripts
-if (typeof global.scripts === 'undefined') {
-  global.scripts = new Map();
-}
-
 export default function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [formData, setFormData] = useState({
@@ -271,7 +266,7 @@ export default function Home() {
         </Head>
         <div style={styles.container}>
           <div style={styles.card}>
-            <div style={styles.logo}>Anura Meow</div>
+            <div style={styles.logo}>NEON SCRIPT PROTECTOR</div>
             <h1 style={styles.title}>Đăng Nhập</h1>
             <form onSubmit={handleLogin}>
               <div style={styles.formGroup}>
@@ -335,7 +330,7 @@ export default function Home() {
       
       <div style={styles.container}>
         <div style={styles.card}>
-          <div style={styles.logo}>Anura Meow script </div>
+          <div style={styles.logo}>NEON SCRIPT PROTECTOR</div>
           <h1 style={styles.title}>Tạo Script Bảo Mật</h1>
           
           <form onSubmit={handleGenerate}>
@@ -376,6 +371,7 @@ export default function Home() {
                 value={formData.realScript}
                 onChange={handleInputChange}
                 placeholder="Hoặc paste mã nguồn thật của bạn tại đây..." 
+                required
               />
             </div>
             
@@ -402,6 +398,7 @@ export default function Home() {
                 value={formData.fakeScript}
                 onChange={handleInputChange}
                 placeholder="Hoặc paste mã nguồn giả tại đây..." 
+                required
               />
             </div>
             
@@ -429,41 +426,25 @@ export default function Home() {
                 border: '1px solid rgba(0, 243, 255, 0.3)'
               }}>
                 <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
-                  🎉 URL Script của bạn:
+                  🎉 URL Script của bạn (Lưu VĨNH VIỄN):
                 </div>
                 <div style={styles.codeBlock}>
                   {result.url}
                 </div>
                 
                 <div style={{marginTop: '15px'}}>
-  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
-    📋 Code để copy (Executor):
-  </div>
-  <div style={styles.codeBlock}>
-    loadstring(game:HttpGet("{result.url}?executor=true"))()
-  </div>
-  <button 
-    type="button" 
-    style={{...styles.btn, ...styles.btnSuccess, marginTop: '10px'}}
-    onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}?executor=true"))()`)}
-  >
-    Copy Executor Code
-  </button>
-</div>
-                
-                <div style={{marginTop: '15px'}}>
                   <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
-                    🌐 Test với curl:
+                    📋 Code để copy (Executor):
                   </div>
                   <div style={styles.codeBlock}>
-                    curl "{result.url}"
+                    loadstring(game:HttpGet("{result.url}"))()
                   </div>
                   <button 
                     type="button" 
-                    style={{...styles.btn, ...styles.btnSecondary, marginTop: '10px'}}
-                    onClick={() => copyToClipboard(result.url)}
+                    style={{...styles.btn, ...styles.btnSuccess, marginTop: '10px'}}
+                    onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}"))()`)}
                   >
-                    Copy Raw URL
+                    Copy Executor Code
                   </button>
                 </div>
                 
@@ -476,9 +457,10 @@ export default function Home() {
                   fontSize: '12px',
                   color: '#94a3b8'
                 }}>
-                  <strong>💡 Lưu ý:</strong><br/>
-                  - Executor sẽ thấy script thật<br/>
-                  - Browser/Termux sẽ thấy script giả<br/>
+                  <strong>✅ Đã fix lỗi 401 & Lưu vĩnh viễn:</strong><br/>
+                  - Script được lưu trong database<br/>
+                  - Không bị mất sau 1 phút<br/>
+                  - Hỗ trợ tất cả executor (Delta, Fluxus, Synapse)<br/>
                   - Hỗ trợ file: .lua, .luau, .txt, .xml, .json, .py, .js, .css, .html
                 </div>
               </div>
