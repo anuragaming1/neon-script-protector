@@ -1,7 +1,11 @@
 // pages/api/raw/[id].js
 
-// Import scripts từ global
-const scripts = global.scripts || new Map();
+// Sử dụng global scripts
+if (!global.scripts) {
+  global.scripts = new Map();
+}
+
+const scripts = global.scripts;
 
 export default async function handler(req, res) {
   const { id } = req.query;
