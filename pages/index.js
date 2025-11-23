@@ -436,20 +436,20 @@ export default function Home() {
                 </div>
                 
                 <div style={{marginTop: '15px'}}>
-                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
-                    📋 Code để copy (Executor):
-                  </div>
-                  <div style={styles.codeBlock}>
-                    loadstring(game:HttpGet("{result.url}"))()
-                  </div>
-                  <button 
-                    type="button" 
-                    style={{...styles.btn, ...styles.btnSuccess, marginTop: '10px'}}
-                    onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}"))()`)}
-                  >
-                    Copy Executor Code
-                  </button>
-                </div>
+  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
+    📋 Code để copy (Executor):
+  </div>
+  <div style={styles.codeBlock}>
+    loadstring(game:HttpGet("{result.url}?executor=true"))()
+  </div>
+  <button 
+    type="button" 
+    style={{...styles.btn, ...styles.btnSuccess, marginTop: '10px'}}
+    onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}?executor=true"))()`)}
+  >
+    Copy Executor Code
+  </button>
+</div>
                 
                 <div style={{marginTop: '15px'}}>
                   <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
