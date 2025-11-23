@@ -1,5 +1,9 @@
 // pages/api/scripts.js
-const { saveScript } = require('../../../lib/database');
+
+// Sử dụng global để lưu scripts vĩnh viễn
+if (!global.scripts) {
+  global.scripts = new Map();
+}
 
 export default async function handler(req, res) {
   // Cho phép CORS
@@ -26,10 +30,17 @@ export default async function handler(req, res) {
       const id = Math.random().toString(36).substring(2, 15) + 
                  Math.random().toString(36).substring(2, 15);
 
-      // Lưu script vào database
-      saveScript(id, repoName, realScript, fakeScript);
+      // Lưu script vào global (tồn tại vĩnh viễn)
+      global.scripts.set(id, {
+        id,
+        repoName,
+        realScript,
+        fakeScript,
+        createdAt: new Date().toISOString()
+      });
 
       console.log('Script created with ID:', id);
+      console.log('Total scripts stored:', global.scripts.size);
 
       // Trả về URL
       const baseUrl = process.env.VERCEL_URL 
@@ -56,3 +67,6 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+// Export scripts để sử dụng trong file khác
+export { scripts: global.scripts };
