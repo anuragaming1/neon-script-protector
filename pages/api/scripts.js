@@ -5,6 +5,8 @@ if (!global.scripts) {
   global.scripts = new Map();
 }
 
+const scripts = global.scripts;
+
 export default async function handler(req, res) {
   // Cho phép CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -31,7 +33,7 @@ export default async function handler(req, res) {
                  Math.random().toString(36).substring(2, 15);
 
       // Lưu script vào global (tồn tại vĩnh viễn)
-      global.scripts.set(id, {
+      scripts.set(id, {
         id,
         repoName,
         realScript,
@@ -40,7 +42,7 @@ export default async function handler(req, res) {
       });
 
       console.log('Script created with ID:', id);
-      console.log('Total scripts stored:', global.scripts.size);
+      console.log('Total scripts stored:', scripts.size);
 
       // Trả về URL
       const baseUrl = process.env.VERCEL_URL 
@@ -67,6 +69,3 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
-
-// Export scripts để sử dụng trong file khác
-export { scripts: global.scripts };
