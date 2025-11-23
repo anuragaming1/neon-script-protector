@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Head from 'next/head';
+
 export default function Home() {
 // Biến toàn cục để lưu scripts (trong production dùng database)
 if (typeof global.scripts === 'undefined') {
