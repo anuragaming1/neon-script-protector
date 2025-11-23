@@ -4,42 +4,35 @@
 const scripts = new Map();
 
 export default function handler(req, res) {
-  // Chỉ cho phép POST request
   if (req.method !== 'POST') {
     return res.status(405).json({ 
       success: false,
-      error: 'Method not allowed. Only POST requests are accepted.' 
+      error: 'Method not allowed'
     });
   }
 
   try {
     const { repoName, realScript, fakeScript } = req.body;
     
-    // Validate input
     if (!repoName || !realScript || !fakeScript) {
       return res.status(400).json({ 
         success: false,
-        error: 'Missing required fields',
-        required: ['repoName', 'realScript', 'fakeScript']
+        error: 'Missing required fields'
       });
     }
 
-    // Tạo ID ngẫu nhiên
     const id = Math.random().toString(36).substring(2, 15) + 
                Math.random().toString(36).substring(2, 15);
 
-    // Lưu script
     scripts.set(id, {
       id,
       repoName,
       realScript,
       fakeScript,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      isDeleted: false
     });
 
-    console.log('Script created with ID:', id);
-
-    // Trả về URL
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}`
       : 'http://localhost:3000';
@@ -57,10 +50,9 @@ export default function handler(req, res) {
     console.error('Error creating script:', error);
     return res.status(500).json({ 
       success: false,
-      error: 'Internal server error: ' + error.message 
+      error: 'Internal server error'
     });
   }
 }
 
-// Export scripts để sử dụng trong file khác
 export { scripts };
