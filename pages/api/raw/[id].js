@@ -11,36 +11,29 @@ export default function handler(req, res) {
   }
 
   const script = scripts.get(id);
-  
-  // Nếu script không tồn tại hoặc đã bị xóa
-  if (!script || script.isDeleted) {
-    const userAgent = req.headers['user-agent'] || '';
-    const isExecutor = 
-      userAgent.includes('Roblox') || 
-      userAgent.includes('Executor') ||
-      req.query.executor === 'true';
-
-    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-    
-    if (isExecutor) {
-      // Executor sẽ thấy script cảnh báo
-      return res.send(`-- Script đã bị xóa\nprint("script đã ko thể sử dụng được nữa rồi ông cháu")\nloadstring(game:HttpGet("https://raw.githubusercontent.com/anuragaming1/Meow-hub/refs/heads/main/Hello"))()`);
-    } else {
-      // Browser/curl sẽ thấy thông báo xóa
-      return res.send('-- Mã nguồn đã bị xoá bởi Anura Gaming');
-    }
+  if (!script) {
+    return res.status(404).json({ 
+      error: 'Script not found'
+    });
   }
 
   try {
     const userAgent = req.headers['user-agent'] || '';
+    
+    // Detect executor - hỗ trợ cả Roblox Luau
     const isExecutor = 
       userAgent.includes('Roblox') || 
       userAgent.includes('Executor') ||
-      req.query.executor === 'true';
+      userAgent.includes('Luau') ||
+      req.headers['x-roblox-id'] ||
+      req.headers['x-requested-with'] === 'XMLHttpRequest' ||
+      req.query.executor === 'true' ||
+      req.query.source === 'executor';
 
     const scriptContent = isExecutor ? script.realScript : script.fakeScript;
     
-    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    // Set content type cho Luau/Lua
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=3600');
     res.setHeader('X-Script-ID', id);
     res.setHeader('X-Script-Type', isExecutor ? 'real' : 'fake');
