@@ -107,7 +107,7 @@ export default function Home() {
     }
   };
 
-  // CSS Styles
+  // CSS Styles - Đơn giản hóa
   const styles = {
     container: {
       minHeight: '100vh',
@@ -116,8 +116,7 @@ export default function Home() {
       justifyContent: 'center',
       background: 'linear-gradient(135deg, #050510, #0b1020)',
       fontFamily: "'Poppins', sans-serif",
-      padding: '20px',
-      margin: 0
+      padding: '20px'
     },
     card: {
       width: '100%',
@@ -126,8 +125,7 @@ export default function Home() {
       borderRadius: '16px',
       padding: '30px',
       boxShadow: '0 0 20px rgba(255, 7, 58, 0.2)',
-      border: '1px solid rgba(255, 7, 58, 0.3)',
-      position: 'relative'
+      border: '1px solid rgba(255, 7, 58, 0.3)'
     },
     title: {
       textAlign: 'center',
@@ -136,8 +134,7 @@ export default function Home() {
       fontSize: '28px',
       background: 'linear-gradient(90deg, #ff073a, #00f3ff)',
       WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      textShadow: '0 0 10px rgba(255, 7, 58, 0.5)'
+      WebkitTextFillColor: 'transparent'
     },
     formGroup: {
       marginBottom: '20px'
@@ -191,13 +188,11 @@ export default function Home() {
       fontWeight: '600',
       cursor: 'pointer',
       textAlign: 'center',
-      marginTop: '10px',
-      transition: 'all 0.3s'
+      marginTop: '10px'
     },
     btnPrimary: {
       background: 'linear-gradient(90deg, #ff073a, #00f3ff)',
-      color: 'white',
-      boxShadow: '0 0 15px rgba(255, 7, 58, 0.4)'
+      color: 'white'
     },
     btnSecondary: {
       background: 'transparent',
@@ -218,14 +213,12 @@ export default function Home() {
       textAlign: 'center',
       marginBottom: '20px',
       fontSize: '24px',
-      fontWeight: '700',
-      textShadow: '0 0 10px rgba(255, 7, 58, 0.7)'
+      fontWeight: '700'
     },
     fileInfo: {
       fontSize: '12px',
       color: '#00f3ff',
-      marginTop: '5px',
-      fontStyle: 'italic'
+      marginTop: '5px'
     },
     codeBlock: {
       background: 'rgba(0, 0, 0, 0.3)',
@@ -246,24 +239,6 @@ export default function Home() {
         <Head>
           <title>Neon Script Protector - Đăng Nhập</title>
           <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
-          <style jsx global>{`
-            @keyframes neon-glow {
-              0%, 100% { opacity: 1; }
-              50% { opacity: 0.7; }
-            }
-            body::before {
-              content: '';
-              position: fixed;
-              top: -10px;
-              left: -10px;
-              right: -10px;
-              bottom: -10px;
-              background: linear-gradient(45deg, #ff073a, #00f3ff, #ff073a);
-              z-index: -1;
-              animation: neon-glow 2s ease-in-out infinite;
-              opacity: 0.1;
-            }
-          `}</style>
         </Head>
         <div style={styles.container}>
           <div style={styles.card}>
@@ -308,24 +283,6 @@ export default function Home() {
       <Head>
         <title>Neon Script Protector</title>
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
-        <style jsx global>{`
-          @keyframes neon-glow {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-          }
-          body::before {
-            content: '';
-            position: fixed;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(45deg, #ff073a, #00f3ff, #ff073a);
-            z-index: -1;
-            animation: neon-glow 2s ease-in-out infinite;
-            opacity: 0.1;
-          }
-        `}</style>
       </Head>
       
       <div style={styles.container}>
@@ -348,9 +305,7 @@ export default function Home() {
             </div>
             
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Script Thật (Chỉ Executor thấy) - .lua, .luau, .txt
-              </label>
+              <label style={styles.label}>Script Thật (Chỉ Executor thấy)</label>
               <input
                 style={styles.fileInput}
                 type="file"
@@ -359,7 +314,7 @@ export default function Home() {
               />
               {realFile && (
                 <div style={styles.fileInfo}>
-                  ✅ Đã chọn: {realFile.name} ({(realFile.size / 1024).toFixed(2)} KB)
+                  ✅ Đã chọn: {realFile.name}
                 </div>
               )}
               <textarea 
@@ -367,15 +322,13 @@ export default function Home() {
                 name="realScript"
                 value={formData.realScript}
                 onChange={handleInputChange}
-                placeholder="Hoặc paste mã nguồn thật của bạn tại đây..." 
+                placeholder="Nhập mã nguồn thật..." 
                 required
               />
             </div>
             
             <div style={styles.formGroup}>
-              <label style={styles.label}>
-                Script Giả (Người dùng thường thấy) - .lua, .luau, .txt
-              </label>
+              <label style={styles.label}>Script Giả (Người dùng thường thấy)</label>
               <input
                 style={styles.fileInput}
                 type="file"
@@ -384,7 +337,7 @@ export default function Home() {
               />
               {fakeFile && (
                 <div style={styles.fileInfo}>
-                  ✅ Đã chọn: {fakeFile.name} ({(fakeFile.size / 1024).toFixed(2)} KB)
+                  ✅ Đã chọn: {fakeFile.name}
                 </div>
               )}
               <textarea 
@@ -392,7 +345,7 @@ export default function Home() {
                 name="fakeScript"
                 value={formData.fakeScript}
                 onChange={handleInputChange}
-                placeholder="Hoặc paste mã nguồn giả tại đây..." 
+                placeholder="Nhập mã nguồn giả..." 
                 required
               />
             </div>
@@ -402,19 +355,15 @@ export default function Home() {
               style={{...styles.btn, ...styles.btnPrimary, opacity: loading ? 0.6 : 1}}
               disabled={loading}
             >
-              {loading ? '🔄 Đang tạo...' : '🚀 Tạo Script URL'}
+              {loading ? 'Đang tạo...' : 'Tạo Script URL'}
             </button>
             
             <button 
               type="button" 
               style={{...styles.btn, ...styles.btnSecondary}}
-              onClick={() => {
-                setIsLoggedIn(false);
-                setFormData({ repoName: '', realScript: '', fakeScript: '' });
-                setResult(null);
-              }}
+              onClick={() => setIsLoggedIn(false)}
             >
-              🔒 Đăng Xuất
+              Đăng Xuất
             </button>
             
             {result && (
@@ -422,21 +371,16 @@ export default function Home() {
                 marginTop: '20px',
                 padding: '20px',
                 background: 'rgba(10, 10, 22, 0.7)',
-                borderRadius: '12px',
-                border: '1px solid rgba(0, 243, 255, 0.3)',
-                animation: 'fadeIn 0.5s ease-in'
+                borderRadius: '8px',
+                border: '1px solid rgba(0, 243, 255, 0.3)'
               }}>
-                <div style={{color:'#e6eef8',marginBottom:'12px',fontSize:'16px', fontWeight: '600'}}>
-                  🎉 URL Script của bạn (Lưu VĨNH VIỄN):
-                </div>
+                <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px'}}>URL Script:</div>
                 <div style={styles.codeBlock}>
                   {result.url}
                 </div>
                 
-                <div style={{marginTop: '20px'}}>
-                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
-                    📋 Code Executor (Script Thật):
-                  </div>
+                <div style={{marginTop: '15px'}}>
+                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px'}}>Code Executor:</div>
                   <div style={styles.codeBlock}>
                     loadstring(game:HttpGet("{result.url}?executor=true"))()
                   </div>
@@ -445,55 +389,14 @@ export default function Home() {
                     style={{...styles.btn, ...styles.btnSuccess, marginTop: '10px'}}
                     onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}?executor=true"))()`)}
                   >
-                    📋 Copy Executor Code
+                    Copy Executor Code
                   </button>
-                </div>
-                
-                <div style={{marginTop: '20px'}}>
-                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
-                    🌐 Link Chia Sẻ (Script Giả):
-                  </div>
-                  <div style={styles.codeBlock}>
-                    {result.url}
-                  </div>
-                  <button 
-                    type="button" 
-                    style={{...styles.btn, ...styles.btnSecondary, marginTop: '10px'}}
-                    onClick={() => copyToClipboard(result.url)}
-                  >
-                    🔗 Copy Share Link
-                  </button>
-                </div>
-                
-                <div style={{
-                  marginTop: '20px',
-                  padding: '15px',
-                  background: 'rgba(255, 7, 58, 0.1)',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 7, 58, 0.3)',
-                  fontSize: '13px',
-                  color: '#94a3b8',
-                  lineHeight: '1.5'
-                }}>
-                  <strong>🔒 BẢO MẬT & LƯU TRỮ VĨNH VIỄN:</strong><br/>
-                  • <strong>Executor Code</strong>: Chỉ người có link này mới thấy script thật<br/>
-                  • <strong>Share Link</strong>: Người khác chỉ thấy script giả<br/>
-                  • <strong>Lưu trữ</strong>: Script được lưu trong file JSON, không bao giờ mất<br/>
-                  • <strong>Hỗ trợ</strong>: Tất cả executor (Delta, Fluxus, Synapse)<br/>
-                  • <strong>File types</strong>: .lua, .luau, .txt, .xml, .json, .py, .js, .css, .html
                 </div>
               </div>
             )}
           </form>
         </div>
       </div>
-      
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
     </>
   );
 }
