@@ -30,12 +30,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // PHÂN BIỆT THẬT/GIẢ
-    const isExecutor = 
-      req.query.executor === 'true' ||
-      req.query.source === 'roblox' ||
-      req.headers['x-roblox-id'] ||
-      req.headers['user-agent']?.includes('Roblox');
+    // PHÂN BIỆT THẬT/GIẢ - LUÔN trả về thật cho executor
+    const isExecutor = true; // Luôn trả về script thật
 
     const scriptContent = isExecutor ? script.realScript : script.fakeScript;
 
@@ -43,7 +39,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=31536000');
     
-    console.log(`🎯 Serving ${isExecutor ? 'REAL' : 'FAKE'} script: ${id}`);
+    console.log(`🎯 Serving script: ${id}`);
     
     return res.send(scriptContent);
     
