@@ -11,6 +11,8 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState(false);
+  const [realFile, setRealFile] = useState(null);
+  const [fakeFile, setFakeFile] = useState(null);
 
   const VALID_USERNAME = "Anura123";
   const VALID_PASSWORD = "Anura123";
@@ -26,6 +28,38 @@ export default function Home() {
       setLoginError(false);
     } else {
       setLoginError(true);
+    }
+  };
+
+  // Upload file thật
+  const handleRealFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setRealFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          realScript: e.target.result
+        }));
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  // Upload file giả
+  const handleFakeFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setFakeFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData(prev => ({
+          ...prev,
+          fakeScript: e.target.result
+        }));
+      };
+      reader.readAsText(file);
     }
   };
 
@@ -67,13 +101,13 @@ export default function Home() {
   const copyToClipboard = async (text) => {
     try {
       await navigator.clipboard.writeText(text);
-      alert('Đã copy!');
+      alert('✅ Đã copy!');
     } catch (err) {
       console.error('Failed to copy: ', err);
     }
   };
 
-  // CSS đơn giản
+  // CSS Styles
   const styles = {
     container: {
       minHeight: '100vh',
@@ -82,16 +116,18 @@ export default function Home() {
       justifyContent: 'center',
       background: 'linear-gradient(135deg, #050510, #0b1020)',
       fontFamily: "'Poppins', sans-serif",
-      padding: '20px'
+      padding: '20px',
+      margin: 0
     },
     card: {
       width: '100%',
-      maxWidth: '500px',
+      maxWidth: '600px',
       background: '#0d0d1a',
       borderRadius: '16px',
       padding: '30px',
       boxShadow: '0 0 20px rgba(255, 7, 58, 0.2)',
-      border: '1px solid rgba(255, 7, 58, 0.3)'
+      border: '1px solid rgba(255, 7, 58, 0.3)',
+      position: 'relative'
     },
     title: {
       textAlign: 'center',
@@ -100,7 +136,8 @@ export default function Home() {
       fontSize: '28px',
       background: 'linear-gradient(90deg, #ff073a, #00f3ff)',
       WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent'
+      WebkitTextFillColor: 'transparent',
+      textShadow: '0 0 10px rgba(255, 7, 58, 0.5)'
     },
     formGroup: {
       marginBottom: '20px'
@@ -133,6 +170,16 @@ export default function Home() {
       minHeight: '120px',
       resize: 'vertical'
     },
+    fileInput: {
+      width: '100%',
+      padding: '12px 16px',
+      background: 'rgba(10, 10, 22, 0.7)',
+      border: '1px solid rgba(255, 7, 58, 0.3)',
+      borderRadius: '8px',
+      color: '#e6eef8',
+      fontFamily: "'Poppins', sans-serif",
+      fontSize: '14px'
+    },
     btn: {
       display: 'block',
       width: '100%',
@@ -144,11 +191,22 @@ export default function Home() {
       fontWeight: '600',
       cursor: 'pointer',
       textAlign: 'center',
-      marginTop: '10px'
+      marginTop: '10px',
+      transition: 'all 0.3s'
     },
     btnPrimary: {
       background: 'linear-gradient(90deg, #ff073a, #00f3ff)',
-      color: 'white'
+      color: 'white',
+      boxShadow: '0 0 15px rgba(255, 7, 58, 0.4)'
+    },
+    btnSecondary: {
+      background: 'transparent',
+      color: '#94a3b8',
+      border: '1px solid rgba(255,255,255,0.2)'
+    },
+    btnSuccess: {
+      background: 'linear-gradient(90deg, #10b981, #059669)',
+      color: '#fff'
     },
     error: {
       color: '#ff073a',
@@ -160,7 +218,25 @@ export default function Home() {
       textAlign: 'center',
       marginBottom: '20px',
       fontSize: '24px',
-      fontWeight: '700'
+      fontWeight: '700',
+      textShadow: '0 0 10px rgba(255, 7, 58, 0.7)'
+    },
+    fileInfo: {
+      fontSize: '12px',
+      color: '#00f3ff',
+      marginTop: '5px',
+      fontStyle: 'italic'
+    },
+    codeBlock: {
+      background: 'rgba(0, 0, 0, 0.3)',
+      padding: '12px',
+      borderRadius: '8px',
+      border: '1px solid rgba(0, 243, 255, 0.3)',
+      marginTop: '10px',
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      color: '#00f3ff',
+      wordBreak: 'break-all'
     }
   };
 
@@ -168,8 +244,26 @@ export default function Home() {
     return (
       <>
         <Head>
-          <title>Neon Script Protector</title>
+          <title>Neon Script Protector - Đăng Nhập</title>
           <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+          <style jsx global>{`
+            @keyframes neon-glow {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.7; }
+            }
+            body::before {
+              content: '';
+              position: fixed;
+              top: -10px;
+              left: -10px;
+              right: -10px;
+              bottom: -10px;
+              background: linear-gradient(45deg, #ff073a, #00f3ff, #ff073a);
+              z-index: -1;
+              animation: neon-glow 2s ease-in-out infinite;
+              opacity: 0.1;
+            }
+          `}</style>
         </Head>
         <div style={styles.container}>
           <div style={styles.card}>
@@ -214,12 +308,30 @@ export default function Home() {
       <Head>
         <title>Neon Script Protector</title>
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+        <style jsx global>{`
+          @keyframes neon-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+          }
+          body::before {
+            content: '';
+            position: fixed;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, #ff073a, #00f3ff, #ff073a);
+            z-index: -1;
+            animation: neon-glow 2s ease-in-out infinite;
+            opacity: 0.1;
+          }
+        `}</style>
       </Head>
       
       <div style={styles.container}>
         <div style={styles.card}>
           <div style={styles.logo}>NEON SCRIPT PROTECTOR</div>
-          <h1 style={styles.title}>Tạo Script</h1>
+          <h1 style={styles.title}>Tạo Script Bảo Mật</h1>
           
           <form onSubmit={handleGenerate}>
             <div style={styles.formGroup}>
@@ -230,31 +342,57 @@ export default function Home() {
                 name="repoName"
                 value={formData.repoName}
                 onChange={handleInputChange}
-                placeholder="Nhập tên repo" 
+                placeholder="Nhập tên repo của bạn" 
                 required
               />
             </div>
             
             <div style={styles.formGroup}>
-              <label style={styles.label}>Script Thật</label>
+              <label style={styles.label}>
+                Script Thật (Chỉ Executor thấy) - .lua, .luau, .txt
+              </label>
+              <input
+                style={styles.fileInput}
+                type="file"
+                accept=".lua,.luau,.txt,.xml,.json,.py,.js,.css,.html"
+                onChange={handleRealFileUpload}
+              />
+              {realFile && (
+                <div style={styles.fileInfo}>
+                  ✅ Đã chọn: {realFile.name} ({(realFile.size / 1024).toFixed(2)} KB)
+                </div>
+              )}
               <textarea 
-                style={styles.textarea}
+                style={{...styles.textarea, marginTop: '10px'}}
                 name="realScript"
                 value={formData.realScript}
                 onChange={handleInputChange}
-                placeholder="Nhập script thật..." 
+                placeholder="Hoặc paste mã nguồn thật của bạn tại đây..." 
                 required
               />
             </div>
             
             <div style={styles.formGroup}>
-              <label style={styles.label}>Script Giả</label>
+              <label style={styles.label}>
+                Script Giả (Người dùng thường thấy) - .lua, .luau, .txt
+              </label>
+              <input
+                style={styles.fileInput}
+                type="file"
+                accept=".lua,.luau,.txt,.xml,.json,.py,.js,.css,.html"
+                onChange={handleFakeFileUpload}
+              />
+              {fakeFile && (
+                <div style={styles.fileInfo}>
+                  ✅ Đã chọn: {fakeFile.name} ({(fakeFile.size / 1024).toFixed(2)} KB)
+                </div>
+              )}
               <textarea 
-                style={styles.textarea}
+                style={{...styles.textarea, marginTop: '10px'}}
                 name="fakeScript"
                 value={formData.fakeScript}
                 onChange={handleInputChange}
-                placeholder="Nhập script giả..." 
+                placeholder="Hoặc paste mã nguồn giả tại đây..." 
                 required
               />
             </div>
@@ -264,47 +402,98 @@ export default function Home() {
               style={{...styles.btn, ...styles.btnPrimary, opacity: loading ? 0.6 : 1}}
               disabled={loading}
             >
-              {loading ? 'Đang tạo...' : 'Tạo Script'}
+              {loading ? '🔄 Đang tạo...' : '🚀 Tạo Script URL'}
             </button>
+            
             <button 
               type="button" 
-              style={{...styles.btn, background: 'transparent', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.2)'}}
-              onClick={() => setIsLoggedIn(false)}
+              style={{...styles.btn, ...styles.btnSecondary}}
+              onClick={() => {
+                setIsLoggedIn(false);
+                setFormData({ repoName: '', realScript: '', fakeScript: '' });
+                setResult(null);
+              }}
             >
-              Đăng Xuất
+              🔒 Đăng Xuất
             </button>
             
             {result && (
               <div style={{
                 marginTop: '20px',
-                padding: '16px',
+                padding: '20px',
                 background: 'rgba(10, 10, 22, 0.7)',
-                borderRadius: '8px',
-                border: '1px solid rgba(0, 243, 255, 0.3)'
+                borderRadius: '12px',
+                border: '1px solid rgba(0, 243, 255, 0.3)',
+                animation: 'fadeIn 0.5s ease-in'
               }}>
-                <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px'}}>URL Script:</div>
+                <div style={{color:'#e6eef8',marginBottom:'12px',fontSize:'16px', fontWeight: '600'}}>
+                  🎉 URL Script của bạn (Lưu VĨNH VIỄN):
+                </div>
+                <div style={styles.codeBlock}>
+                  {result.url}
+                </div>
+                
+                <div style={{marginTop: '20px'}}>
+                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
+                    📋 Code Executor (Script Thật):
+                  </div>
+                  <div style={styles.codeBlock}>
+                    loadstring(game:HttpGet("{result.url}?executor=true"))()
+                  </div>
+                  <button 
+                    type="button" 
+                    style={{...styles.btn, ...styles.btnSuccess, marginTop: '10px'}}
+                    onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}?executor=true"))()`)}
+                  >
+                    📋 Copy Executor Code
+                  </button>
+                </div>
+                
+                <div style={{marginTop: '20px'}}>
+                  <div style={{color:'#e6eef8',marginBottom:'8px',fontSize:'14px', fontWeight: '600'}}>
+                    🌐 Link Chia Sẻ (Script Giả):
+                  </div>
+                  <div style={styles.codeBlock}>
+                    {result.url}
+                  </div>
+                  <button 
+                    type="button" 
+                    style={{...styles.btn, ...styles.btnSecondary, marginTop: '10px'}}
+                    onClick={() => copyToClipboard(result.url)}
+                  >
+                    🔗 Copy Share Link
+                  </button>
+                </div>
+                
                 <div style={{
-                  wordBreak: 'break-all',
-                  fontFamily: 'monospace',
-                  fontSize: '14px',
-                  color: '#00f3ff',
-                  marginBottom: '12px',
-                  padding: '8px',
-                  background: 'rgba(0, 0, 0, 0.3)',
-                  borderRadius: '4px'
-                }}>{result.url}</div>
-                <button 
-                  type="button" 
-                  style={{...styles.btn, background: 'linear-gradient(90deg, #10b981, #059669)', color: '#fff'}}
-                  onClick={() => copyToClipboard(`loadstring(game:HttpGet("${result.url}"))()`)}
-                >
-                  Copy Executor Code
-                </button>
+                  marginTop: '20px',
+                  padding: '15px',
+                  background: 'rgba(255, 7, 58, 0.1)',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 7, 58, 0.3)',
+                  fontSize: '13px',
+                  color: '#94a3b8',
+                  lineHeight: '1.5'
+                }}>
+                  <strong>🔒 BẢO MẬT & LƯU TRỮ VĨNH VIỄN:</strong><br/>
+                  • <strong>Executor Code</strong>: Chỉ người có link này mới thấy script thật<br/>
+                  • <strong>Share Link</strong>: Người khác chỉ thấy script giả<br/>
+                  • <strong>Lưu trữ</strong>: Script được lưu trong file JSON, không bao giờ mất<br/>
+                  • <strong>Hỗ trợ</strong>: Tất cả executor (Delta, Fluxus, Synapse)<br/>
+                  • <strong>File types</strong>: .lua, .luau, .txt, .xml, .json, .py, .js, .css, .html
+                </div>
               </div>
             )}
           </form>
         </div>
       </div>
+      
+      <style jsx global>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </>
   );
 }
