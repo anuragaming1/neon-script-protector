@@ -15,6 +15,7 @@ export default async function handler(req, res) {
     try {
       const { repoName, realScript, fakeScript } = req.body;
 
+      // Validate input
       if (!repoName || !realScript || !fakeScript) {
         return res.status(400).json({ 
           success: false,
@@ -26,10 +27,17 @@ export default async function handler(req, res) {
       const id = Math.random().toString(36).substring(2, 15) + 
                  Math.random().toString(36).substring(2, 15);
 
-      // Lưu script
-      saveScript(id, repoName, realScript, fakeScript);
+      // Lưu script vào file JSON
+      const saved = saveScript(id, repoName, realScript, fakeScript);
+      
+      if (!saved) {
+        return res.status(500).json({ 
+          success: false,
+          error: 'Không thể lưu script'
+        });
+      }
 
-      // Trả về URL
+      // Tạo URL
       const baseUrl = process.env.VERCEL_URL 
         ? `https://${process.env.VERCEL_URL}`
         : 'http://localhost:3000';
