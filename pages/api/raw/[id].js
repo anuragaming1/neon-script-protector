@@ -26,12 +26,17 @@ export default async function handler(req, res) {
     if (!script) {
       return res.status(404).json({ 
         error: 'Script not found',
-        message: `Script với ID "${id}" không tồn tại. Vui lòng tạo script mới.`
+        message: `Script với ID "${id}" không tồn tại.`
       });
     }
 
-    // PHÂN BIỆT THẬT/GIẢ - LUÔN trả về thật cho executor
-    const isExecutor = true; // Luôn trả về script thật
+    // PHÂN BIỆT THẬT/GIẢ
+    const userAgent = req.headers['user-agent'] || '';
+    const isExecutor = 
+      req.query.executor === 'true' ||
+      req.query.source === 'roblox' ||
+      userAgent.includes('Roblox') ||
+      userAgent.includes('Executor');
 
     const scriptContent = isExecutor ? script.realScript : script.fakeScript;
 
@@ -39,7 +44,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'public, max-age=31536000');
     
-    console.log(`🎯 Serving script: ${id}`);
+    console.log(`🎯 Serving ${isExecutor ? 'REAL' : 'FAKE'} script: ${id}`);
     
     return res.send(scriptContent);
     
