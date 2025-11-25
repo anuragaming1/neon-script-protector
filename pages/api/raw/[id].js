@@ -1,16 +1,10 @@
 // pages/api/raw/[id].js
-
-// Sử dụng global scripts
-if (!global.scripts) {
-  global.scripts = new Map();
-}
-
-const scripts = global.scripts;
+const { getScript } = require('../../../../lib/storage');
 
 export default async function handler(req, res) {
   const { id } = req.query;
 
-  // Cho phép CORS - QUAN TRỌNG để tránh lỗi 401
+  // Cho phép CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -26,25 +20,30 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Lấy script từ global
-    const script = scripts.get(id);
+    // Lấy script từ storage
+    const script = getScript(id);
     
     if (!script) {
       return res.status(404).json({ 
         error: 'Script not found',
-        message: `Script với ID "${id}" không tồn tại.`
+        message: `Script với ID "${id}" không tồn tại. Vui lòng tạo script mới.`
       });
     }
 
-    // LUÔN trả về script thật cho tất cả request
-    const scriptContent = script.realScript;
+    // PHÂN BIỆT THẬT/GIẢ
+    const isExecutor = 
+      req.query.executor === 'true' ||
+      req.query.source === 'roblox' ||
+      req.headers['x-roblox-id'] ||
+      req.headers['user-agent']?.includes('Roblox');
 
-    // Set headers cho Luau code
+    const scriptContent = isExecutor ? script.realScript : script.fakeScript;
+
+    // Set headers
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache 1 năm
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
     
-    console.log(`Serving script: ${id}`);
-    console.log('Available scripts:', Array.from(scripts.keys()));
+    console.log(`🎯 Serving ${isExecutor ? 'REAL' : 'FAKE'} script: ${id}`);
     
     return res.send(scriptContent);
     
