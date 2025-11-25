@@ -1,5 +1,5 @@
 // pages/api/raw/[id].js
-const { getScript } = require('../../../../lib/storage');
+const { getScript } = require('../../../lib/storage');
 
 export default async function handler(req, res) {
   const { id } = req.query;
