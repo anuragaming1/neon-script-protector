@@ -1,11 +1,5 @@
 // pages/api/scripts.js
-
-// Sử dụng global để lưu scripts vĩnh viễn
-if (!global.scripts) {
-  global.scripts = new Map();
-}
-
-const scripts = global.scripts;
+const { saveScript } = require('../../../lib/storage');
 
 export default async function handler(req, res) {
   // Cho phép CORS
@@ -32,17 +26,8 @@ export default async function handler(req, res) {
       const id = Math.random().toString(36).substring(2, 15) + 
                  Math.random().toString(36).substring(2, 15);
 
-      // Lưu script vào global (tồn tại vĩnh viễn)
-      scripts.set(id, {
-        id,
-        repoName,
-        realScript,
-        fakeScript,
-        createdAt: new Date().toISOString()
-      });
-
-      console.log('Script created with ID:', id);
-      console.log('Total scripts stored:', scripts.size);
+      // Lưu script
+      saveScript(id, repoName, realScript, fakeScript);
 
       // Trả về URL
       const baseUrl = process.env.VERCEL_URL 
