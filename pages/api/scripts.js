@@ -1,5 +1,5 @@
 // pages/api/scripts.js
-const { saveScript } = require('../../../lib/storage');
+const { saveScript } = require('../../lib/storage');
 
 export default async function handler(req, res) {
   // Cho phép CORS
