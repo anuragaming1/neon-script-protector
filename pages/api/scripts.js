@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       if (!repoName || !realScript || !fakeScript) {
         return res.status(400).json({ 
           success: false,
-          error: 'Missing required fields'
+          error: 'Vui lòng điền đầy đủ thông tin'
         });
       }
 
@@ -40,14 +40,14 @@ export default async function handler(req, res) {
         success: true,
         id,
         url: scriptUrl,
-        message: 'Script created successfully'
+        message: 'Tạo script thành công!'
       });
       
     } catch (error) {
       console.error('Error creating script:', error);
       return res.status(500).json({ 
         success: false,
-        error: 'Internal server error' 
+        error: 'Lỗi server' 
       });
     }
   }
