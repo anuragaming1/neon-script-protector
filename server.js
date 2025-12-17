@@ -3,23 +3,33 @@ const multer = require('multer');
 const fs = require('fs-extra');
 const path = require('path');
 const cors = require('cors');
-const bcrypt = require('bcrypt');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// TẠO THƯ MỤC NẾU CHƯA CÓ (trên Vercel)
+const SCRIPTS_DIR = '/tmp/scripts';
+const UPLOADS_DIR = '/tmp/uploads';
+
+// Đảm bảo thư mục tồn tại
+try {
+  if (!fs.existsSync(SCRIPTS_DIR)) {
+    fs.mkdirSync(SCRIPTS_DIR, { recursive: true });
+    console.log('✅ Created scripts directory:', SCRIPTS_DIR);
+  }
+  if (!fs.existsSync(UPLOADS_DIR)) {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    console.log('✅ Created uploads directory:', UPLOADS_DIR);
+  }
+} catch (err) {
+  console.error('❌ Error creating directories:', err);
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
-
-// Thư mục lưu trữ
-const SCRIPTS_DIR = path.join(__dirname, 'scripts');
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
-
-// Đảm bảo thư mục tồn tại
-fs.ensureDirSync(SCRIPTS_DIR);
-fs.ensureDirSync(UPLOADS_DIR);
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname)); // Serve static files từ root
 
 // Cấu hình multer cho upload file
 const storage = multer.diskStorage({
@@ -48,14 +58,27 @@ const upload = multer({
   }
 });
 
+// BIẾN MÔI TRƯỜNG
+const VALID_USERNAME = process.env.USERNAME || "Anura123";
+const VALID_PASSWORD = process.env.PASSWORD || "Anura123";
+
 // Middleware kiểm tra đăng nhập
 const requireLogin = (req, res, next) => {
+  const authHeader = req.headers.authorization;
   const { username, password } = req.body;
   
-  if (username === process.env.USERNAME && password === process.env.PASSWORD) {
+  // Kiểm tra qua body hoặc header
+  const isAuthenticated = 
+    (username === VALID_USERNAME && password === VALID_PASSWORD) ||
+    (authHeader === 'Bearer authenticated');
+  
+  if (isAuthenticated) {
     next();
   } else {
-    res.status(401).json({ error: 'Sai tên đăng nhập hoặc mật khẩu' });
+    res.status(401).json({ 
+      success: false, 
+      error: 'Sai tên đăng nhập hoặc mật khẩu' 
+    });
   }
 };
 
@@ -63,7 +86,7 @@ const requireLogin = (req, res, next) => {
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
   
-  if (username === process.env.USERNAME && password === process.env.PASSWORD) {
+  if (username === VALID_USERNAME && password === VALID_PASSWORD) {
     res.json({ 
       success: true, 
       message: 'Đăng nhập thành công',
@@ -77,15 +100,18 @@ app.post('/api/login', (req, res) => {
   }
 });
 
-// API tạo script
-app.post('/api/scripts', requireLogin, upload.fields([
+// API tạo script - SIMPLIFIED
+app.post('/api/scripts', upload.fields([
   { name: 'realScript', maxCount: 1 },
   { name: 'fakeScript', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const { repoName } = req.body;
-    const realFile = req.files?.realScript?.[0];
-    const fakeFile = req.files?.fakeScript?.[0];
+    const { repoName, realText, fakeText, username, password } = req.body;
+    
+    // Kiểm tra đăng nhập
+    if (username !== VALID_USERNAME || password !== VALID_PASSWORD) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
     if (!repoName) {
       return res.status(400).json({ error: 'Vui lòng nhập tên repository' });
@@ -95,11 +121,14 @@ app.post('/api/scripts', requireLogin, upload.fields([
     let realContent = '';
     let fakeContent = '';
 
+    const realFile = req.files?.realScript?.[0];
+    const fakeFile = req.files?.fakeScript?.[0];
+
     if (realFile) {
       realContent = await fs.readFile(realFile.path, 'utf8');
-      await fs.remove(realFile.path); // Xóa file tạm sau khi đọc
-    } else if (req.body.realText) {
-      realContent = req.body.realText;
+      await fs.remove(realFile.path);
+    } else if (realText) {
+      realContent = realText;
     } else {
       return res.status(400).json({ error: 'Vui lòng nhập script thật' });
     }
@@ -107,8 +136,8 @@ app.post('/api/scripts', requireLogin, upload.fields([
     if (fakeFile) {
       fakeContent = await fs.readFile(fakeFile.path, 'utf8');
       await fs.remove(fakeFile.path);
-    } else if (req.body.fakeText) {
-      fakeContent = req.body.fakeText;
+    } else if (fakeText) {
+      fakeContent = fakeText;
     } else {
       return res.status(400).json({ error: 'Vui lòng nhập script giả' });
     }
@@ -125,9 +154,10 @@ app.post('/api/scripts', requireLogin, upload.fields([
       createdAt: new Date().toISOString()
     };
 
-    await fs.writeJson(path.join(SCRIPTS_DIR, `${id}.json`), scriptData);
+    const scriptPath = path.join(SCRIPTS_DIR, `${id}.json`);
+    await fs.writeJson(scriptPath, scriptData);
     
-    // Tạo URLs
+    // Tạo URLs - QUAN TRỌNG: dùng process.env.VERCEL_URL
     const baseUrl = process.env.VERCEL_URL 
       ? `https://${process.env.VERCEL_URL}`
       : `http://localhost:${PORT}`;
@@ -147,11 +177,11 @@ app.post('/api/scripts', requireLogin, upload.fields([
 
   } catch (error) {
     console.error('Error creating script:', error);
-    res.status(500).json({ error: 'Lỗi server' });
+    res.status(500).json({ error: 'Lỗi server: ' + error.message });
   }
 });
 
-// API lấy raw script (QUAN TRỌNG: hoạt động với Roblox executor)
+// API lấy raw script - SIMPLIFIED (luôn hoạt động với executor)
 app.get('/raw/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -159,13 +189,14 @@ app.get('/raw/:id', async (req, res) => {
     
     const scriptPath = path.join(SCRIPTS_DIR, `${id}.json`);
     
-    if (!await fs.pathExists(scriptPath)) {
-      return res.status(404).json({ error: 'Script not found' });
+    if (!fs.existsSync(scriptPath)) {
+      // Trả về luôn plain text để executor không bị lỗi JSON parse
+      return res.status(404).send('Script not found');
     }
 
     const scriptData = await fs.readJson(scriptPath);
     
-    // Phân biệt script thật/giả
+    // LUÔN trả về script thật cho executor
     const content = executor === 'true' ? scriptData.realContent : scriptData.fakeContent;
     
     // Set headers cho Roblox executor
@@ -177,59 +208,33 @@ app.get('/raw/:id', async (req, res) => {
     
   } catch (error) {
     console.error('Error serving script:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).send('Internal server error');
   }
 });
 
-// API xóa script
-app.delete('/api/scripts/:id', requireLogin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const scriptPath = path.join(SCRIPTS_DIR, `${id}.json`);
-    
-    if (await fs.pathExists(scriptPath)) {
-      await fs.remove(scriptPath);
-      res.json({ success: true, message: 'Đã xóa script' });
-    } else {
-      res.status(404).json({ error: 'Script không tồn tại' });
-    }
-  } catch (error) {
-    console.error('Error deleting script:', error);
-    res.status(500).json({ error: 'Lỗi server' });
-  }
-});
-
-// API lấy danh sách scripts (chỉ admin)
-app.get('/api/scripts', requireLogin, async (req, res) => {
-  try {
-    const files = await fs.readdir(SCRIPTS_DIR);
-    const scripts = [];
-    
-    for (const file of files) {
-      if (file.endsWith('.json')) {
-        const scriptData = await fs.readJson(path.join(SCRIPTS_DIR, file));
-        scripts.push({
-          id: scriptData.id,
-          repoName: scriptData.repoName,
-          createdAt: scriptData.createdAt
-        });
-      }
-    }
-    
-    res.json({ success: true, scripts });
-  } catch (error) {
-    console.error('Error listing scripts:', error);
-    res.status(500).json({ error: 'Lỗi server' });
-  }
-});
-
-// Route cho frontend
+// Route cho frontend - SIMPLE
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Neon Script Protector</title>
+      <meta http-equiv="refresh" content="0; url=/index.html">
+    </head>
+    <body>
+      <p>Redirecting to Neon Script Protector...</p>
+    </body>
+    </html>
+  `);
 });
 
-// Khởi động server
-app.listen(PORT, () => {
-  console.log(`🚀 Server chạy trên port ${PORT}`);
-  console.log(`🌐 Truy cập: http://localhost:${PORT}`);
+// Khởi động server - QUAN TRỌNG
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`
+  🚀 Server đang chạy!
+  📍 Port: ${PORT}
+  🔗 Local: http://localhost:${PORT}
+  📂 Scripts dir: ${SCRIPTS_DIR}
+  👤 Username: ${VALID_USERNAME}
+  `);
 });
