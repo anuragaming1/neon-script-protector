@@ -670,3 +670,42 @@
     </script>
 </body>
 </html>
+// Test server connection
+async function testConnection() {
+  try {
+    const response = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: 'Anura123', password: 'Anura123' })
+    });
+    
+    if (response.ok) {
+      console.log('✅ Server connection OK');
+    } else {
+      console.error('❌ Server connection failed');
+    }
+  } catch (error) {
+    console.error('❌ Cannot connect to server:', error);
+    
+    // Hiển thị thông báo lỗi
+    if (!document.getElementById('connectionError')) {
+      const errorDiv = document.createElement('div');
+      errorDiv.id = 'connectionError';
+      errorDiv.style.cssText = `
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        background: #ff073a;
+        color: white;
+        padding: 10px;
+        border-radius: 5px;
+        z-index: 1000;
+      `;
+      errorDiv.innerHTML = '❌ Lỗi kết nối server. Vui lòng refresh lại trang.';
+      document.body.appendChild(errorDiv);
+    }
+  }
+}
+
+// Test connection khi trang load
+window.addEventListener('load', testConnection);
